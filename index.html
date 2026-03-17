@@ -1,34 +1,137 @@
-<div id="vault">
-    <h2>🔓 Bóveda Privada</h2>
-    <p>Solo tú puedes ver esto.</p>
-    
-    <input type="file" id="imageInput" accept="image/*" style="color:white; margin-bottom:20px;">
-    
-    <div class="secret-content">
-        <div id="gallery">
-            <p>No hay archivos guardados.</p>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora Pro</title>
+    <style>
+        :root { --bg: #1c1c1c; --accent: #333; --text: white; --orange: #ff9f0a; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #000; margin: 0; display: flex; justify-content: center; align-items: center; height: 100vh; overflow: hidden; }
+        
+        /* Interfaz Calculadora */
+        .calc-wrapper { width: 100%; max-width: 350px; background: var(--bg); padding: 20px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        #screen { width: 100%; height: 80px; background: transparent; border: none; color: var(--text); text-align: right; font-size: 40px; margin-bottom: 20px; outline: none; }
+        .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+        button { height: 70px; border-radius: 50%; border: none; font-size: 24px; cursor: pointer; transition: 0.2s; background: var(--accent); color: var(--text); }
+        button:active { transform: scale(0.9); opacity: 0.8; }
+        .btn-op { background: var(--orange); }
+        .btn-gray { background: #a5a5a5; color: black; }
+
+        /* Interfaz Bóveda */
+        #vault { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #121212; color: white; padding: 20px; box-sizing: border-box; overflow-y: auto; z-index: 100; }
+        .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; padding-bottom: 15px; margin-bottom: 20px; }
+        .gallery { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+        .gallery img, .gallery video { width: 100%; height: 100px; object-fit: cover; border-radius: 8px; border: 1px solid #333; }
+        .controls { background: #1e1e1e; padding: 15px; border-radius: 12px; margin-bottom: 20px; }
+        input[type="file"] { display: none; }
+        .btn-add { background: var(--orange); padding: 10px 20px; border-radius: 8px; color: white; font-weight: bold; display: inline-block; cursor: pointer; }
+        .btn-close { background: #e74c3c; padding: 10px; border-radius: 8px; color: white; border: none; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+    <div id="calc-app" class="calc-wrapper">
+        <input type="text" id="screen" readonly placeholder="0">
+        <div class="grid">
+            <button class="btn-gray" onclick="clearScreen()">AC</button>
+            <button class="btn-gray" onclick="add('(')">(</button>
+            <button class="btn-gray" onclick="add(')')">)</button>
+            <button class="btn-op" onclick="add('/')">÷</button>
+            <button onclick="add('7')">7</button><button onclick="add('8')">8</button><button onclick="add('9')">9</button>
+            <button class="btn-op" onclick="add('*')">×</button>
+            <button onclick="add('4')">4</button><button onclick="add('5')">5</button><button onclick="add('6')">6</button>
+            <button class="btn-op" onclick="add('-')">−</button>
+            <button onclick="add('1')">1</button><button onclick="add('2')">2</button><button onclick="add('3')">3</button>
+            <button class="btn-op" onclick="add('+')">+</button>
+            <button onclick="add('0')" style="grid-column: span 2; border-radius: 40px;">0</button>
+            <button onclick="add('.')">.</button>
+            <button class="btn-op" onclick="checkCode()">=</button>
         </div>
     </div>
-    <br>
-    <button onclick="lockVault()" style="background:#e74c3c; color:white;">Cerrar y Bloquear</button>
-</div>
 
-<script>
-    // Lógica para mostrar la imagen seleccionada
-    const imageInput = document.getElementById('imageInput');
-    const gallery = document.getElementById('gallery');
+    <div id="vault">
+        <div class="header">
+            <h2>Mi Bóveda</h2>
+            <button class="btn-close" onclick="lock()">Cerrar</button>
+        </div>
 
-    imageInput.addEventListener('change', function() {
-        const file = this.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                gallery.innerHTML = `<img src="${e.target.result}" style="width:100%; border-radius:5px;">`;
-                // Aquí podrías usar localStorage.setItem para guardarla permanentemente
+        <div class="controls">
+            <p style="font-size: 14px; color: #aaa;">Clave actual: <span id="current-pass-display">1234</span></p>
+            <label class="btn-add">＋ Agregar Archivo</label>
+            <input type="file" id="fileInput" accept="image/*,video/*">
+            <button onclick="changePass()" style="background: #444; color: white; border: none; padding: 10px; border-radius: 8px; margin-left: 10px;">Cambiar Clave</button>
+        </div>
+
+        <div class="gallery" id="gallery">
+            </div>
+    </div>
+
+    <script>
+        let secretCode = localStorage.getItem('vaultPass') || "1234";
+        const screen = document.getElementById('screen');
+        document.getElementById('current-pass-display').innerText = secretCode;
+
+        function add(v) { screen.value += v; }
+        function clearScreen() { screen.value = ''; }
+
+        function checkCode() {
+            if (screen.value === secretCode) {
+                document.getElementById('calc-app').style.display = 'none';
+                document.getElementById('vault').style.display = 'block';
+                loadFiles();
+            } else {
+                try { screen.value = eval(screen.value); } catch { screen.value = "Error"; }
             }
-            reader.readAsDataURL(file);
         }
-    });
 
-    // ... (Mantén el resto de la lógica de la calculadora que te pasé antes)
-</script>
+        function lock() {
+            document.getElementById('vault').style.display = 'none';
+            document.getElementById('calc-app').style.display = 'block';
+            clearScreen();
+        }
+
+        function changePass() {
+            let newPass = prompt("Ingresa la nueva clave numérica:");
+            if (newPass && !isNaN(newPass)) {
+                secretCode = newPass;
+                localStorage.setItem('vaultPass', newPass);
+                document.getElementById('current-pass-display').innerText = newPass;
+                alert("Clave actualizada correctamente");
+            }
+        }
+
+        // Manejo de archivos
+        const fileInput = document.getElementById('fileInput');
+        fileInput.addEventListener('change', function() {
+            const file = this.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const files = JSON.parse(localStorage.getItem('vaultFiles') || "[]");
+                    files.push({ data: e.target.result, type: file.type });
+                    localStorage.setItem('vaultFiles', JSON.stringify(files));
+                    loadFiles();
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        function loadFiles() {
+            const gallery = document.getElementById('gallery');
+            const files = JSON.parse(localStorage.getItem('vaultFiles') || "[]");
+            gallery.innerHTML = '';
+            files.forEach(file => {
+                let el;
+                if (file.type.includes('image')) {
+                    el = document.createElement('img');
+                } else {
+                    el = document.createElement('video');
+                    el.controls = true;
+                }
+                el.src = file.data;
+                gallery.appendChild(el);
+            });
+        }
+    </script>
+</body>
+</html>
